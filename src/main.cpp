@@ -14,6 +14,9 @@
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
+#include <boost/assign/list_of.hpp>
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/uniform_int.hpp>
 
 using namespace std;
 using namespace boost;
@@ -1085,7 +1088,54 @@ uint256 static GetOrphanRoot(const CBlockHeader* pblock)
     return pblock->GetHash();
 }
 
-int64 static GetBlockValue(int nHeight, int64 nFees)
+int static generateMTRandom(unsigned int s, int range)
+{
+    boost::mt19937 gen(s);
+    boost::uniform_int<> dist(1, range);
+    return dist(gen);
+}
+
+long hex2long(const char* hexString) {
+    static const long hextable[] =
+    {
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,         // 10-19
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,         // 30-39
+        -1, -1, -1, -1, -1, -1, -1, -1,  0,  1,
+        2,  3,  4,  5,  6,  7,  8,  9, -1, -1,         // 50-59
+        -1, -1, -1, -1, -1, 10, 11, 12, 13, 14,
+        15, -1, -1, -1, -1, -1, -1, -1, -1, -1,         // 70-79
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, 10, 11, 12,         // 90-99
+        13, 14, 15, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,         // 110-109
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,         // 130-139
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,         // 150-159
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,         // 170-179
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,         // 190-199
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,         // 210-219
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,         // 230-239
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1
+    };
+    
+    long ret = 0;
+    
+    while (*hexString && ret >= 0) {
+        ret = (ret << 4) | hextable[(uint8_t)*hexString++];
+    }
+    
+    return ret;
+}
+
+int64 static GetBlockValue(int nHeight, int64 nFees, uint256 prevHash)
 {
 
     int64 rewd = 25 * COIN;
@@ -1755,8 +1805,14 @@ bool CBlock::ConnectBlock(CValidationState &state, CBlockIndex* pindex, CCoinsVi
     if (fBenchmark)
         printf("- Connect %u transactions: %.2fms (%.3fms/tx, %.3fms/txin)\n", (unsigned)vtx.size(), 0.001 * nTime, 0.001 * nTime / vtx.size(), nInputs <= 1 ? 0 : 0.001 * nTime / (nInputs-1));
 
-    if (vtx[0].GetValueOut() > GetBlockValue(pindex->nHeight, nFees))
-        return state.DoS(100, error("ConnectBlock() : coinbase pays too much (actual=%"PRI64d" vs limit=%"PRI64d")", vtx[0].GetValueOut(), GetBlockValue(pindex->nHeight, nFees)));
+    uint256 pvHash = 0;
+    if(pindex->pprev)
+    {
+        pvHash = pindex->pprev->GetBlockHash();
+    }
+
+    if (vtx[0].GetValueOut() > GetBlockValue(pindex->nHeight, nFees, pvHash))
+        return state.DoS(100, error("ConnectBlock() : coinbase pays too much (actual=%"PRI64d" vs limit=%"PRI64d")", vtx[0].GetValueOut(), GetBlockValue(pindex->nHeight, nFees, pvHash)));
 
     if (!control.Wait())
         return state.DoS(100, false);
@@ -4499,7 +4555,7 @@ CBlockTemplate* CreateNewBlock(const CScript& scriptPubKeyIn)
         nLastBlockSize = nBlockSize;
         printf("CreateNewBlock(): total size %"PRI64u"\n", nBlockSize);
 
-        pblock->vtx[0].vout[0].nValue = GetBlockValue(pindexPrev->nHeight+1, nFees);
+        pblock->vtx[0].vout[0].nValue = GetBlockValue(pindexPrev->nHeight+1, nFees, pindexPrev->GetBlockHash());
         pblocktemplate->vTxFees[0] = -nFees;
 
         // Fill in header
