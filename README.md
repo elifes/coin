@@ -5,7 +5,7 @@ eLifes coin Release coming soon!
 eLifescoin integration/staging tree
 ================================
 
-http://www.elifescoin.org
+http://elifescoin.site
 
 Copyright (c) 2009-2014 Bitcoin Developers
 Copyright (c) 2018 eLifescoin Developers
