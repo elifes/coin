@@ -1,3 +1,7 @@
+eLifes coin Release coming soon!
+
+
+
 eLifescoin integration/staging tree
 ================================
 
