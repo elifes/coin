@@ -1087,23 +1087,47 @@ uint256 static GetOrphanRoot(const CBlockHeader* pblock)
 
 int64 static GetBlockValue(int nHeight, int64 nFees)
 {
-    int64 nSubsidy = 500 * COIN;
-    if(nHeight == 2)  
-    {
-        nSubsidy = 2000000 * COIN;
-    }
-    else if(nHeight < 5000)  
-    {
-        nSubsidy = 5000 * COIN;
-    }
-    else if(nHeight < 10000)  
-    {
-        nSubsidy = 2500 * COIN;
-    }
-    // Subsidy is cut in half every 840000 blocks, which will occur approximately every 4 years
-    nSubsidy >>= (nHeight / 840000); // eLifescoin: 840k blocks in ~4 years
 
-    return nSubsidy + nFees;
+    int64 rewd = 25 * COIN;
+    
+    std::string cseed_str = prevHash.ToString().substr(7,7);
+    const char* cseed = cseed_str.c_str();
+    long seed = hex2long(cseed);
+    int rand = generateMTRandom(seed, 99999);
+    int fast_rand = 0;
+    int snd_rand = 0;
+
+    if(nHeight < 50000)
+    {
+        rewd = (1 + rand) * COIN;
+    }
+    else if(nHeight < 150000)
+    {
+        cseed_str = prevHash.ToString().substr(7,7);
+        cseed = cseed_str.c_str();
+        seed = hex2long(cseed);
+        fast_rand = generateMTRandom(seed, 9999);
+        rewd = (1 + fast_rand) * COIN;
+    }
+    else if(nHeight < 200000)
+    {
+        cseed_str = prevHash.ToString().substr(7,7);
+        cseed = cseed_str.c_str();
+        seed = hex2long(cseed);
+        snd_rand = generateMTRandom(seed, 999999);
+        rewd = (1 + snd_rand) * COIN;
+    }
+    else if(nHeight < 400000)
+    {
+        rewd = 500 * COIN;
+    }
+    else if(nHeight < 600000)
+    {
+        rewd = 2500 * COIN;
+    }
+
+    return rewd + nFees;
+
 }
 
 static const int64 nTargetTimespan = 20 * 30; // eLifescoin: 10 minutes
