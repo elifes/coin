@@ -2238,8 +2238,8 @@ Address: %4
     </message>
     <message>
         <location line="-28"/>
-        <source>Listen for connections on &lt;port&gt; (default: 240521 or testnet: 241521)</source>
-        <translation>Принимать входящие подключения на &lt;port&gt; (по умолчанию: 240521 или 241521 в тестовой сети)</translation>
+        <source>Listen for connections on &lt;port&gt; (default: 20521 or testnet: 21521)</source>
+        <translation>Принимать входящие подключения на &lt;port&gt; (по умолчанию: 20521 или 21521 в тестовой сети)</translation>
     </message>
     <message>
         <location line="+5"/>
@@ -2273,8 +2273,8 @@ Address: %4
     </message>
     <message>
         <location line="+27"/>
-        <source>Listen for JSON-RPC connections on &lt;port&gt; (default: 240520 or testnet: 241520)</source>
-        <translation>Прослушивать подключения JSON-RPC на &lt;порту&gt; (по умолчанию: 240520 или для testnet: 241520)</translation>
+        <source>Listen for JSON-RPC connections on &lt;port&gt; (default: 20520 or testnet: 21520)</source>
+        <translation>Прослушивать подключения JSON-RPC на &lt;порту&gt; (по умолчанию: 20520 или для testnet: 21520)</translation>
     </message>
     <message>
         <location line="+37"/>

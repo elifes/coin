@@ -1173,12 +1173,12 @@ void MapPort(bool)
 // The first name is used as information source for addrman.
 // The second name should resolve to a list of seed addresses.
 static const char *strMainNetDNSSeed[][2] = {
-    {"elifescoin.site", "192.168.100.127"},
+    {"elifescoin.site", "192.168.100.138"},
     {NULL, NULL}
 };
 
 static const char *strTestNetDNSSeed[][2] = {
-    {"localhost", "192.168.100.127"},
+    {"localhost", "192.168.100.138"},
     {NULL, NULL}
 };
 
